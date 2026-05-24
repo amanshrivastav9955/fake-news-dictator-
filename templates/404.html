@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Page Not Found - VERIFACT{% endblock %}
+
+{% block content %}
+<div class="error-page-wrapper text-center">
+    <div class="glass-card error-card animate-fade-in">
+        <div class="error-icon"><i class="fa-solid fa-compass-drafting"></i></div>
+        <h2>Page Not Found (404)</h2>
+        <p>The page you are looking for does not exist or has been moved.</p>
+        <div class="error-actions">
+            <a href="{{ url_for('index') }}" class="btn btn-primary"><i class="fa-solid fa-house"></i> Back to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

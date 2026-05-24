@@ -1,0 +1,33 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Databases
+database.db
+
+# Large raw CSV datasets (too large for standard Git)
+Fake.csv
+True.csv
+
+# Environment configurations & secrets
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+
+# IDEs and editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Fake News Detector{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Marked.js Markdown Parser (v2.5 AI Conversational Upgrade) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Background Elements for Premium Look -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar glass-nav">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="nav-logo">
+                <i class="fa-solid fa-shield-halved nav-logo-icon"></i>
+                <span>VERI<span class="logo-accent">FACT</span></span>
+            </a>
+            
+            <div class="nav-menu" id="navMenu">
+                <a href="{{ url_for('index') }}" class="nav-link {% if request.path == '/' %}active{% endif %}">
+                    <i class="fa-solid fa-house"></i> Home
+                </a>
+                
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">
+                        <i class="fa-solid fa-chart-line"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('dashboard_realtime') }}" class="nav-link {% if request.path == '/dashboard-realtime' %}active{% endif %}">
+                        <i class="fa-solid fa-satellite-dish"></i> Live Stream
+                    </a>
+                    
+                    {% if session.get('role') == 'admin' %}
+                        <a href="{{ url_for('admin') }}" class="nav-link {% if request.path == '/admin' %}active{% endif %}">
+                            <i class="fa-solid fa-user-gear"></i> Admin
+                        </a>
+                    {% endif %}
+                    
+                    <span class="nav-user-greeting">
+                        <i class="fa-solid fa-user-circle"></i> {{ session.get('username') }}
+                    </span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline nav-btn">
+                        <i class="fa-solid fa-right-from-bracket"></i> Log Out
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-outline nav-btn">
+                        <i class="fa-solid fa-right-to-bracket"></i> Log In
+                    </a>
+                    <a href="{{ url_for('signup') }}" class="btn btn-primary nav-btn">
+                        <i class="fa-solid fa-user-plus"></i> Sign Up
+                    </a>
+                {% endif %}
+                
+                <!-- Dark/Light Theme Toggle -->
+                <button class="theme-toggle-btn" id="themeToggle" title="Toggle Theme">
+                    <i class="fa-solid fa-moon theme-icon-dark"></i>
+                    <i class="fa-solid fa-sun theme-icon-light"></i>
+                </button>
+            </div>
+            
+            <button class="mobile-nav-toggle" id="mobileNavToggle">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="content-wrapper">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2026 VERIFACT Fake News Detection System. Powered by NLP & Machine Learning.</p>
+            <div class="footer-links">
+                <a href="{{ url_for('index') }}">Home</a>
+                <a href="https://github.com" target="_blank"><i class="fa-brands fa-github"></i> GitHub</a>
+                <a href="/api/predict" target="_blank"><i class="fa-solid fa-code"></i> API Access</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Chatbot Interface (Upgraded v2.5) -->
+    <div class="chatbot-container" id="chatbotContainer">
+        <!-- Chat Toggle Button with Glow -->
+        <button class="chatbot-toggle" id="chatbotToggle" title="Open Verifact AI Intelligence Assistant">
+            <i class="fa-solid fa-user-shield"></i>
+            <span class="chatbot-pulse"></span>
+        </button>
+        
+        <!-- Upgraded Cyber-Intelligence Chat Window -->
+        <div class="chatbot-window glass-card" id="chatbotWindow">
+            <div class="chatbot-header">
+                <div class="chatbot-header-title">
+                    <div class="bot-avatar-container">
+                        <i class="fa-solid fa-user-ninja bot-avatar-icon"></i>
+                        <span class="online-pulse-dot"></span>
+                    </div>
+                    <div>
+                        <h4>VERIFACT AI</h4>
+                        <span>Misinformation Specialist</span>
+                    </div>
+                </div>
+                <div class="chatbot-header-actions">
+                    <button class="chatbot-hdr-btn" id="chatbotHistoryToggle" title="Toggle Chat History">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </button>
+                    <button class="chatbot-close-btn" id="chatbotClose"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+            
+            <div class="chatbot-main-body">
+                <!-- Collapsible Chat History Sidebar -->
+                <div class="chatbot-history-sidebar hidden" id="chatbotHistorySidebar">
+                    <div class="sidebar-hdr">
+                        <h5>Saved Investigations</h5>
+                        <button class="btn-new-thread" id="newThreadBtn" title="Start New Thread">
+                            <i class="fa-solid fa-plus-circle"></i>
+                        </button>
+                    </div>
+                    <div class="history-list" id="chatbotHistoryList">
+                        <!-- Filled dynamically by main.js -->
+                        <span class="empty-history-msg">No saved chats</span>
+                    </div>
+                </div>
+                
+                <!-- Active Chat Messages Board -->
+                <div class="chatbot-chat-board">
+                    <div class="chatbot-messages" id="chatbotMessages">
+                        <div class="chat-message bot">
+                            🛡️ **Greetings, Investigator.** I am **VERIFACT AI**, your real-time conversational media verification and cyber-intelligence assistant.
+                            
+                            Submit any claim, news text, or URL to begin. I can help you:
+                            * **Explain** why an article is flagged as fake
+                            * **Spot** structural clickbait or bias
+                            * **Analyze** emotional manipulation & propaganda patterns
+                            * **Suggest** trusted fact-checking references
+                        </div>
+                    </div>
+                    
+                    <div class="chatbot-suggestions" id="chatbotSuggestions">
+                        <button class="suggestion-chip" data-msg="Verify: Leaked documents suggest massive infrastructure reforms in Japan"><i class="fa-solid fa-magnifying-glass"></i> Analyze Leak News</button>
+                        <button class="suggestion-chip" data-msg="What are common propaganda techniques?"><i class="fa-solid fa-bullhorn"></i> Propaganda Tips</button>
+                        <button class="suggestion-chip" data-msg="How does model consensus work here?"><i class="fa-solid fa-network-wired"></i> Model Voting</button>
+                    </div>
+                    
+                    <!-- Voice/Input control bar -->
+                    <div class="chatbot-input-container">
+                        <button id="chatbotMic" class="chatbot-control-btn" title="Voice Input (Speech-to-Text)">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
+                        <input type="text" id="chatbotInput" placeholder="Analyze a claim or ask a question..." autocomplete="off">
+                        <button id="chatbotSend" class="btn btn-primary" title="Send message"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

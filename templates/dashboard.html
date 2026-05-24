@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - VERIFACT{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h2><i class="fa-solid fa-chart-line"></i> Personal Prediction Dashboard</h2>
+    <p>Monitor your analyzed news articles and review model classifications.</p>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="glass-card stat-card">
+        <div class="stat-icon primary"><i class="fa-solid fa-square-poll-horizontal"></i></div>
+        <div class="stat-content">
+            <span class="stat-label">Total Analyzed</span>
+            <h3 class="stat-number">{{ total }}</h3>
+        </div>
+    </div>
+    
+    <div class="glass-card stat-card">
+        <div class="stat-icon success"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="stat-content">
+            <span class="stat-label">Real News Detected</span>
+            <h3 class="stat-number">{{ real }}</h3>
+        </div>
+    </div>
+    
+    <div class="glass-card stat-card">
+        <div class="stat-icon danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="stat-content">
+            <span class="stat-label">Fake News Detected</span>
+            <h3 class="stat-number">{{ fake }}</h3>
+        </div>
+    </div>
+    
+    <div class="glass-card stat-card">
+        <div class="stat-icon warning"><i class="fa-solid fa-scale-balanced"></i></div>
+        <div class="stat-content">
+            <span class="stat-label">Credibility Ratio</span>
+            <h3 class="stat-number">
+                {% if total > 0 %}
+                    {{ ((real / total) * 100) | round(1) }}%
+                {% else %}
+                    0%
+                {% endif %}
+            </h3>
+        </div>
+    </div>
+</div>
+
+<!-- Prediction History Table -->
+<div class="glass-card table-card">
+    <div class="card-header flex-header">
+        <div>
+            <h3><i class="fa-solid fa-clock-rotate-left"></i> Prediction History</h3>
+            <p>A log of your previous news verifications.</p>
+        </div>
+        <div class="table-actions">
+            <input type="text" id="searchHistory" class="search-input" placeholder="Search headline..." onkeyup="filterHistory()">
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        {% if predictions %}
+        <table class="history-table" id="historyTable">
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Headline (Title)</th>
+                    <th>Verdict</th>
+                    <th>PAC Conf.</th>
+                    <th>LR Conf.</th>
+                    <th>NB Conf.</th>
+                    <th>Source</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pred in predictions %}
+                <tr>
+                    <td class="date-cell">{{ pred['timestamp'] }}</td>
+                    <td class="headline-cell" title="{{ pred['title'] }}">{{ pred['title'] | truncate(60) }}</td>
+                    <td>
+                        <span class="verdict-pill {% if pred['final_prediction'] == 'REAL' %}real{% else %}fake{% endif %}">
+                            {{ pred['final_prediction'] }}
+                        </span>
+                    </td>
+                    <td><span class="conf-small">{{ pred['confidence_pac'] }}%</span></td>
+                    <td><span class="conf-small">{{ pred['confidence_lr'] }}%</span></td>
+                    <td><span class="conf-small">{{ pred['confidence_nb'] }}%</span></td>
+                    <td>
+                        <span class="source-pill {{ pred['source'] }}">
+                            {{ pred['source'] }}
+                        </span>
+                    </td>
+                    <td class="text-right actions-cell">
+                        <a href="{{ url_for('download_report', pred_id=pred['id']) }}" class="btn btn-icon btn-outline" title="Download Report">
+                            <i class="fa-solid fa-download"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state text-center">
+            <i class="fa-solid fa-inbox empty-icon"></i>
+            <h4>No Predictions Yet</h4>
+            <p>You haven't run any predictions yet. Head to the home page to verify your first news article.</p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Verify Now</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterHistory() {
+    var input, filter, table, tr, td, i, txtValue;
+    input = document.getElementById("searchHistory");
+    filter = input.value.toUpperCase();
+    table = document.getElementById("historyTable");
+    if (!table) return;
+    tr = table.getElementsByTagName("tr");
+    for (i = 1; i < tr.length; i++) {
+        td = tr[i].getElementsByClassName("headline-cell")[0];
+        if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }       
+    }
+}
+</script>
+{% endblock %}

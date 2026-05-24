@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Panel - VERIFACT{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+    <h2><i class="fa-solid fa-user-gear"></i> System Administration Control</h2>
+    <p>Monitor system-wide classification patterns, user actions, and model performance metrics.</p>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="glass-card stat-card">
+        <div class="stat-icon info"><i class="fa-solid fa-server"></i></div>
+        <div class="stat-content">
+            <span class="stat-label">System Predictions</span>
+            <h3 class="stat-number">{{ stats['total_predictions'] }}</h3>
+        </div>
+    </div>
+    
+    <div class="glass-card stat-card">
+        <div class="stat-icon primary"><i class="fa-solid fa-users"></i></div>
+        <div class="stat-content">
+            <span class="stat-label">Registered Accounts</span>
+            <h3 class="stat-number">{{ stats['total_users'] }}</h3>
+        </div>
+    </div>
+    
+    <div class="glass-card stat-card">
+        <div class="stat-icon success"><i class="fa-solid fa-clipboard-check"></i></div>
+        <div class="stat-content">
+            <span class="stat-label">Total Real News</span>
+            <h3 class="stat-number">{{ stats['real_count'] }}</h3>
+        </div>
+    </div>
+    
+    <div class="glass-card stat-card">
+        <div class="stat-icon danger"><i class="fa-solid fa-skull-crossbones"></i></div>
+        <div class="stat-content">
+            <span class="stat-label">Total Fake News</span>
+            <h3 class="stat-number">{{ stats['fake_count'] }}</h3>
+        </div>
+    </div>
+</div>
+
+<!-- Analytics & Visualization Grid -->
+<div class="admin-charts-grid">
+    <!-- Chart 1: Model Accuracy -->
+    <div class="glass-card chart-card">
+        <div class="card-header">
+            <h4><i class="fa-solid fa-chart-bar"></i> Classifier Accuracy Benchmarks</h4>
+        </div>
+        <div class="chart-container">
+            <canvas id="accuracyChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Chart 2: Label Distribution -->
+    <div class="glass-card chart-card">
+        <div class="card-header">
+            <h4><i class="fa-solid fa-chart-pie"></i> Verdict Distributions</h4>
+        </div>
+        <div class="chart-container">
+            <canvas id="distributionChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- User Accounts & Predictions Log tabbed panel -->
+<div class="workspace-grid admin-logs-grid">
+    <!-- Registered Users List -->
+    <div class="glass-card admin-sub-card">
+        <div class="card-header">
+            <h3><i class="fa-solid fa-id-card"></i> Registered Accounts</h3>
+            <p>List of registered system users.</p>
+        </div>
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Registered Date</th>
+                        <th class="text-right">Checks Run</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in stats['users_list'] %}
+                    <tr>
+                        <td><i class="fa-regular fa-user"></i> <b>{{ u['username'] }}</b></td>
+                        <td>
+                            <span class="role-badge {{ u['role'] }}">{{ u['role'] | upper }}</span>
+                        </td>
+                        <td>{{ u['created_at'].split()[0] if u['created_at'] else 'N/A' }}</td>
+                        <td class="text-right"><b>{{ u['prediction_count'] }}</b></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Prediction History Audit Log -->
+    <div class="glass-card admin-sub-card">
+        <div class="card-header">
+            <h3><i class="fa-solid fa-receipt"></i> Prediction Audit Logs</h3>
+            <p>Review and audit all predictions run on the platform.</p>
+        </div>
+        <div class="table-responsive">
+            {% if predictions %}
+            <table class="admin-table" id="auditTable">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Headline</th>
+                        <th>Verdict</th>
+                        <th>Source</th>
+                        <th class="text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in predictions %}
+                    <tr id="pred-row-{{ p['id'] }}">
+                        <td>
+                            {% if p['username'] %}
+                                <span class="audit-username">{{ p['username'] }}</span>
+                            {% else %}
+                                <span class="audit-guest">Guest</span>
+                            {% endif %}
+                        </td>
+                        <td title="{{ p['title'] }}">{{ p['title'] | truncate(35) }}</td>
+                        <td>
+                            <span class="verdict-pill {% if p['final_prediction'] == 'REAL' %}real{% else %}fake{% endif %}">
+                                {{ p['final_prediction'] }}
+                            </span>
+                        </td>
+                        <td><span class="source-pill {{ p['source'] }}">{{ p['source'] }}</span></td>
+                        <td class="text-right">
+                            <button onclick="deleteAuditLog({{ p['id'] }})" class="btn btn-icon btn-danger-outline" title="Delete Log">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="text-center p-4">
+                <p>No predictions to audit.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Load Chart.js from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Prepare Data from Backend Context
+    const metricsData = {{ metrics | tojson | safe }};
+    const statsData = {
+        real: {{ stats['real_count'] }},
+        fake: {{ stats['fake_count'] }},
+        manual: {{ stats['source_dist'].get('manual', 0) }},
+        file: {{ stats['source_dist'].get('file', 0) }}
+    };
+    
+    // Pass to charts.js logic
+    window.metricsData = metricsData;
+    window.statsData = statsData;
+</script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+function deleteAuditLog(predId) {
+    if (confirm("Are you sure you want to delete this prediction log? This action is permanent.")) {
+        fetch('/delete_log/' + predId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const row = document.getElementById('pred-row-' + predId);
+                if (row) {
+                    row.remove();
+                }
+            } else {
+                alert("Error: " + (data.error || "Could not delete row"));
+            }
+        })
+        .catch(error => {
+            console.error("Error deleting audit log:", error);
+            alert("An error occurred. Please try again.");
+        });
+    }
+}
+</script>
+{% endblock %}

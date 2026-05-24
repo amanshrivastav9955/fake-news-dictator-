@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: verifact_web
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - PORT=5000
+      - DATABASE_TYPE=mongodb
+      - MONGO_URI=mongodb://db:27017/verifact
+      - SECRET_KEY=prod_session_secret_key_change_me
+      - JWT_SECRET_KEY=prod_jwt_secret_key_change_me
+      - USE_TRANSFORMERS=false
+    depends_on:
+      - db
+    volumes:
+      - sqlite_data:/app/data
+    restart: always
+
+  db:
+    image: mongo:6.0
+    container_name: verifact_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+
+volumes:
+  sqlite_data:
+  mongo_data:

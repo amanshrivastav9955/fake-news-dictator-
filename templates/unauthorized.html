@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Access Denied - VERIFACT{% endblock %}
+
+{% block content %}
+<div class="error-page-wrapper text-center">
+    <div class="glass-card error-card animate-fade-in">
+        <div class="error-icon"><i class="fa-solid fa-ban"></i></div>
+        <h2>Access Denied (403)</h2>
+        <p>You do not have administrative privileges to access this area of the application.</p>
+        <p>If you are an administrator, please log in with your admin credentials.</p>
+        <div class="error-actions">
+            <a href="{{ url_for('index') }}" class="btn btn-outline"><i class="fa-solid fa-house"></i> Home</a>
+            <a href="{{ url_for('login') }}" class="btn btn-primary"><i class="fa-solid fa-right-to-bracket"></i> Admin Login</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

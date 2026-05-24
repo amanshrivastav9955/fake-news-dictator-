@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Log In - VERIFACT{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="glass-card auth-card animate-fade-in">
+        <div class="auth-header text-center">
+            <i class="fa-solid fa-shield-halved auth-logo-icon"></i>
+            <h2>Welcome Back</h2>
+            <p>Log in to access your personal prediction dashboard</p>
+        </div>
+        
+        {% if error %}
+        <div class="alert alert-danger">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+        
+        <form action="{{ url_for('login') }}" method="POST" class="auth-form">
+            <div class="form-group">
+                <label for="username"><i class="fa-solid fa-user"></i> Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label for="password"><i class="fa-solid fa-lock"></i> Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-right-to-bracket"></i> Log In</button>
+        </form>
+        
+        <div class="auth-footer text-center">
+            <p>Don't have an account? <a href="{{ url_for('signup') }}">Sign Up here</a></p>
+            <div class="guest-credentials">
+                <p><strong>Demo Accounts:</strong></p>
+                <p><i class="fa-solid fa-user-shield"></i> Admin: <code>admin</code> / <code>admin123</code></p>
+                <p><i class="fa-solid fa-user"></i> Regular: <code>user</code> / <code>user123</code></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

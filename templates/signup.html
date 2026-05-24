@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up - VERIFACT{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="glass-card auth-card animate-fade-in">
+        <div class="auth-header text-center">
+            <i class="fa-solid fa-user-plus auth-logo-icon"></i>
+            <h2>Create Account</h2>
+            <p>Register to save prediction history and unlock insights</p>
+        </div>
+        
+        {% if error %}
+        <div class="alert alert-danger">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+        
+        {% if success %}
+        <div class="alert alert-success">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>{{ success }} <a href="{{ url_for('login') }}">Log in now</a></span>
+        </div>
+        {% endif %}
+        
+        <form action="{{ url_for('signup') }}" method="POST" class="auth-form">
+            <div class="form-group">
+                <label for="username"><i class="fa-solid fa-user"></i> Username</label>
+                <input type="text" id="username" name="username" placeholder="Choose a username" required autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label for="password"><i class="fa-solid fa-lock"></i> Password (min 6 chars)</label>
+                <input type="password" id="password" name="password" placeholder="Create a strong password" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_password"><i class="fa-solid fa-circle-check"></i> Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-user-plus"></i> Sign Up</button>
+        </form>
+        
+        <div class="auth-footer text-center">
+            <p>Already have an account? <a href="{{ url_for('login') }}">Log In here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
