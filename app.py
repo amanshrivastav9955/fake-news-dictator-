@@ -21,7 +21,7 @@ import news_fetcher
 # Initialize Flask & SocketIO Server
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'verifact_secure_session_key_192837465')
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent' if os.name == 'posix' else 'threading')
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode=None)
 
 # Ensure database structure is fully initialized
 db.init_db()
