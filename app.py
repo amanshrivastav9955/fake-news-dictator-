@@ -603,4 +603,4 @@ if __name__ == '__main__':
     
     # Run using socketio wrapper to support live channels
     port = int(os.getenv('PORT', 5000))
-    socketio.run(app, debug=True, port=port, allow_unsafe_werkzeug=True)
+    socketio.run(app, host='0.0.0.0', debug=True, port=port, allow_unsafe_werkzeug=True)
